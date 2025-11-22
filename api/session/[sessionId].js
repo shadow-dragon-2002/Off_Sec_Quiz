@@ -11,7 +11,8 @@ module.exports = async (req, res) => {
     }
 
     try {
-        const { sessionId } = req.query;
+        // Support both Vercel (req.query) and Express (req.params)
+        const sessionId = req.query.sessionId || req.params.sessionId;
         const session = await storage.getSession(sessionId);
         
         if (!session) {

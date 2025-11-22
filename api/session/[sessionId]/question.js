@@ -1,4 +1,5 @@
 const storage = require('../../storage.js');
+const { getShuffledOptions } = require('../../utils/shuffle.js');
 
 module.exports = async (req, res) => {
     if (req.method !== 'GET') {
@@ -6,7 +7,8 @@ module.exports = async (req, res) => {
     }
 
     try {
-        const { sessionId } = req.query;
+        // Support both Vercel (req.query) and Express (req.params)
+        const sessionId = req.query.sessionId || req.params.sessionId;
         const session = await storage.getSession(sessionId);
 
         if (!session) {
@@ -23,6 +25,11 @@ module.exports = async (req, res) => {
             // This could mean the quiz is over.
             return res.status(404).json({ error: 'Question not found or quiz complete' });
         }
+
+        // Shuffle options deterministically based on session and question ID
+        const seed = `${sessionId}_${question.id}`;
+        const { options } = getShuffledOptions(question.options, seed);
+        question.options = options;
 
         return res.json(question);
     } catch (error) {

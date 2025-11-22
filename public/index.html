@@ -4,35 +4,147 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CYBERQUIZ: Offensive Security Challenge</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="cyberpunk-bg"></div>
-    <div class="scan-line"></div>
+    <canvas id="bg-canvas"></canvas>
+    <div id="crtOverlay" class="crt-overlay"></div>
+    
+    <!-- Leaderboard Button -->
+    <button id="viewLeaderboardBtn" class="settings-btn" style="right: 80px;" aria-label="View Leaderboard">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 20V10"/>
+            <path d="M12 20V4"/>
+            <path d="M6 20v-6"/>
+        </svg>
+    </button>
+
+    <!-- Settings Button -->
+    <button id="settingsBtn" class="settings-btn" aria-label="System Settings">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z"/>
+        </svg>
+    </button>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal-overlay">
+        <div class="modal-box tech-border" style="max-width: 400px;">
+            <h3 class="modal-title">SYSTEM CONFIG</h3>
+            <div class="settings-grid">
+                <div class="setting-item">
+                    <span class="setting-label">AUDIO_FEEDBACK</span>
+                    <button id="toggleAudio" class="toggle-btn active">ON</button>
+                </div>
+                <div class="setting-item">
+                    <span class="setting-label">CRT_EFFECTS</span>
+                    <button id="toggleCrt" class="toggle-btn active">ON</button>
+                </div>
+                <div class="setting-item">
+                    <span class="setting-label">BG_ANIMATION</span>
+                    <button id="toggleMotion" class="toggle-btn active">ON</button>
+                </div>
+            </div>
+            <button id="closeSettingsBtn" class="cyber-btn" style="margin-top: 20px;">SAVE CONFIG</button>
+        </div>
+    </div>
+
+    <div id="customModal" class="modal-overlay">
+        <div class="modal-box tech-border">
+            <h3 class="modal-title">SYSTEM ALERT</h3>
+            <p id="modalMessage" class="modal-message"></p>
+            <button id="modalBtn" class="cyber-btn">ACKNOWLEDGE</button>
+        </div>
+    </div>
     
     <div id="welcomeScreen" class="screen active">
         <div class="container">
-            <div class="glitch-title" data-text="CYBERQUIZ">CYBERQUIZ</div>
-            <h2 class="subtitle">OFFENSIVE SECURITY CHALLENGE</h2>
+            <div class="glitch-title">CYBERQUIZ</div>
+            <h2 class="subtitle">Offensive Security Challenge</h2>
             <div class="terminal-box">
-                <p class="terminal-text">> SYSTEM: UNAUTHORIZED ACCESS DETECTED</p>
-                <p class="terminal-text">> INITIATING SECURITY PROTOCOL...</p>
-                <p class="terminal-text">> ENTER CREDENTIALS TO PROCEED</p>
+                <p class="terminal-text">→ Test your offensive security knowledge</p>
+                <p class="terminal-text">→ 60 questions spanning various cybersecurity domains</p>
+                <p class="terminal-text">→ Enter your alias to begin the challenge</p>
             </div>
-            <input type="text" id="usernameInput" placeholder="ENTER HACKER ALIAS..." maxlength="20">
-            <button id="startBtn" class="cyber-btn">JACK IN</button>
-            <div class="rules">
-                <h3>[ MISSION PARAMETERS ]</h3>
-                <ul>
-                    <li>◆ Starting Credits: <span class="highlight">1000 POINTS</span></li>
-                    <li>◆ Correct Answer: <span class="success">+50 POINTS</span></li>
-                    <li>◆ Wrong Answer: <span class="danger">-50 POINTS</span></li>
-                    <li>◆ Time Limit: <span class="highlight">45 MINUTES</span></li>
-                    <li>◆ Total Challenges: <span class="highlight">60 QUESTIONS</span></li>
-                    <li>◆ Reach 0 points: <span class="danger">SYSTEM LOCKOUT</span></li>
-                    <li>◆ All questions must be answered correctly to progress</li>
-                    <li>◆ No restarts - One shot only</li>
-                </ul>
+            <div id="authContainer">
+                <input type="text" id="usernameInput" placeholder="Enter your alias..." maxlength="20">
+                <button id="startBtn" class="cyber-btn">Start Challenge</button>
+            </div>
+            <div id="resumeContainer" style="display: none; text-align: center; margin-bottom: 20px;">
+                <p class="terminal-text" style="margin-bottom: 15px; color: var(--neon-cyan);">ACTIVE SESSION DETECTED: <span id="resumeName" style="color: #fff;"></span></p>
+                <div style="display: flex; gap: 10px; justify-content: center;">
+                    <button id="resumeBtn" class="cyber-btn">RESUME MISSION</button>
+                    <button id="resetBtn" class="cyber-btn danger-btn" style="border-color: var(--neon-pink); color: var(--neon-pink);">ABORT & NEW</button>
+                </div>
+            </div>
+            <div class="mission-system">
+                <div class="mission-header">[ MISSION PARAMETERS ]</div>
+                
+                <div class="mission-content">
+                    <div class="mission-row">
+                        <span class="m-icon">◆</span>
+                        <span class="m-label">Starting Credits:</span>
+                        <span class="m-value highlight">1000 POINTS</span>
+                    </div>
+                    
+                    <div class="mission-row">
+                        <span class="m-icon">◆</span>
+                        <span class="m-label">Correct Answer:</span>
+                        <span class="m-value success">+50 POINTS</span>
+                    </div>
+                    
+                    <div class="mission-row">
+                        <span class="m-icon">◆</span>
+                        <span class="m-label">Wrong Answer:</span>
+                        <span class="m-value danger">-50 POINTS</span>
+                    </div>
+                    
+                    <div class="mission-row">
+                        <span class="m-icon">◆</span>
+                        <span class="m-label">Time Limit:</span>
+                        <span class="m-value highlight">45 MINUTES</span>
+                    </div>
+                    
+                    <div class="mission-row">
+                        <span class="m-icon">◆</span>
+                        <span class="m-label">Total Challenges:</span>
+                        <span class="m-value highlight">60 QUESTIONS</span>
+                    </div>
+
+                    <div class="mission-row">
+                        <span class="m-icon">◆</span>
+                        <span class="m-label">Reach 0 points:</span>
+                        <span class="m-value danger">SYSTEM LOCKOUT</span>
+                    </div>
+                </div>
+
+                <div class="mission-footer">
+                    <div class="mission-note"><span class="m-icon">◆</span> All questions must be answered correctly to progress</div>
+                    <div class="mission-note"><span class="m-icon">◆</span> No restarts - One shot only</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="leaderboardModal" class="modal-overlay">
+        <div class="modal-box cyber-dialog" style="max-width: 1000px; width: 90%;">
+            <div class="dialog-header">
+                <div class="dh-left">
+                    <span class="dh-icon">◈</span>
+                    <span class="dh-title">GLOBAL_OPERATIVE_DATABASE</span>
+                </div>
+                <div class="dh-right">
+                    <span class="dh-status">STATUS: <span class="highlight">LIVE</span></span>
+                </div>
+            </div>
+            
+            <div id="leaderboardContent" class="leaderboard-content"></div>
+            
+            <div class="dialog-footer">
+                <button id="closeLeaderboardBtn" class="cyber-btn-flat">[ CLOSE_DATABASE ]</button>
             </div>
         </div>
     </div>
@@ -57,28 +169,33 @@
                     <span id="progress" class="hud-value">0/60</span>
                 </div>
             </div>
+            <div id="progressBar" class="progress-container"></div>
 
-            <div class="question-container">
+            <div class="question-container tech-border">
                 <div class="question-number">CHALLENGE <span id="questionNum">1</span>/60</div>
                 <div id="question" class="question-text"></div>
-                <div id="feedback" class="feedback"></div>
                 <div id="options" class="options"></div>
             </div>
         </div>
+    </div>
+    
+    <!-- Notification Area -->
+    <div id="notificationArea" class="notification-area">
+        <div id="feedback" class="feedback"></div>
     </div>
 
     <div id="gameOverScreen" class="screen">
         <div class="container">
             <div class="game-over-box">
-                <h1 class="glitch-title game-over-title" data-text="SYSTEM BREACH">SYSTEM BREACH</h1>
-                <p class="terminal-text danger">[ CRITICAL ERROR: CREDITS DEPLETED ]</p>
-                <p class="terminal-text">Your hacking attempt has been detected and terminated.</p>
+                <h1 class="glitch-title game-over-title">Challenge Failed</h1>
+                <p class="terminal-text danger">Credits depleted</p>
+                <p class="terminal-text">You've been eliminated from the challenge.</p>
                 <div class="final-stats">
                     <p>Operative: <span id="goPlayerName"></span></p>
-                    <p>Challenges Completed: <span id="goProgress"></span>/60</p>
+                    <p>Questions Completed: <span id="goProgress"></span>/60</p>
                     <p>Time Elapsed: <span id="goTime"></span></p>
                 </div>
-                <button onclick="location.reload()" class="cyber-btn danger-btn">DISCONNECT</button>
+                <button onclick="location.reload()" class="cyber-btn danger-btn">Exit Challenge</button>
             </div>
         </div>
     </div>
@@ -86,17 +203,17 @@
     <div id="completionScreen" class="screen">
         <div class="container">
             <div class="completion-box">
-                <h1 class="glitch-title success-title" data-text="MISSION COMPLETE">MISSION COMPLETE</h1>
-                <p class="terminal-text success">[ ACCESS GRANTED: ALL PROTOCOLS BYPASSED ]</p>
+                <h1 class="glitch-title success-title">Challenge Complete</h1>
+                <p class="terminal-text success">Congratulations! You've completed all 60 questions.</p>
                 <div class="final-stats">
                     <p>Operative: <span id="compPlayerName"></span></p>
                     <p>Final Credits: <span id="finalScore" class="highlight"></span></p>
                     <p>Time Taken: <span id="timeTaken"></span></p>
                     <p>Grade: <span id="finalGrade" class="grade-badge"></span></p>
                 </div>
-                <h2 class="leaderboard-title">[ HALL OF HACKERS ]</h2>
+                <h2 class="leaderboard-title">Leaderboard</h2>
                 <div id="leaderboard" class="leaderboard"></div>
-                <button onclick="location.reload()" class="cyber-btn">NEW SESSION</button>
+                <button onclick="location.reload()" class="cyber-btn">New Challenge</button>
             </div>
         </div>
     </div>
@@ -104,15 +221,15 @@
     <div id="timeoutScreen" class="screen">
         <div class="container">
             <div class="game-over-box">
-                <h1 class="glitch-title game-over-title" data-text="TIME EXPIRED">TIME EXPIRED</h1>
-                <p class="terminal-text danger">[ SECURITY TRACE COMPLETE ]</p>
-                <p class="terminal-text">Your location has been compromised. Connection terminated.</p>
+                <h1 class="glitch-title game-over-title">Time Expired</h1>
+                <p class="terminal-text danger">Challenge time limit reached</p>
+                <p class="terminal-text">The 45-minute window has closed.</p>
                 <div class="final-stats">
                     <p>Operative: <span id="toPlayerName"></span></p>
-                    <p>Challenges Completed: <span id="toProgress"></span>/60</p>
+                    <p>Questions Completed: <span id="toProgress"></span>/60</p>
                     <p>Final Credits: <span id="toScore"></span></p>
                 </div>
-                <button onclick="location.reload()" class="cyber-btn danger-btn">DISCONNECT</button>
+                <button onclick="location.reload()" class="cyber-btn danger-btn">Exit Challenge</button>
             </div>
         </div>
     </div>

@@ -132,9 +132,25 @@ async function submitAnswer(sessionId, questionId, answerIndex) {
     return data;
 }
 
+async function checkUsernameExists(username) {
+    const { data, error } = await supabase
+        .from('sessions')
+        .select('id')
+        .eq('username', username)
+        .limit(1);
+
+    if (error) {
+        console.error('Error checking username:', error);
+        return false;
+    }
+    
+    return data && data.length > 0;
+}
+
 module.exports = {
     getSession,
     setSession,
+    checkUsernameExists,
     getLeaderboard,
     setLeaderboard,
     getQuestion,

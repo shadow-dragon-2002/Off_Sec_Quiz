@@ -35,6 +35,12 @@ module.exports = async (req, res) => {
         if (forbiddenWords.some(word => cleanUsername.toLowerCase().includes(word))) {
             return res.status(400).json({ error: 'Username not allowed' });
         }
+
+        // 5. Check if username already exists
+        const exists = await storage.checkUsernameExists(cleanUsername);
+        if (exists) {
+            return res.status(400).json({ error: 'Username already taken' });
+        }
         
         const sessionId = uuidv4();
         const sessionData = {
